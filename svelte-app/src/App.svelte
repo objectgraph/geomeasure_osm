@@ -32,18 +32,14 @@
 			};
 
 			// Distance Label
-			const distanceLabel = L.DomUtil.create(
+			const outputLabel = L.DomUtil.create(
 				"div",
-				"distance-label",
+				"output-label",
 				container
 			);
-			distanceLabel.id = "distance";
-			distanceLabel.innerHTML = "Distance: 0 meters";
+			outputLabel.id = "output";
+			outputLabel.innerHTML = "Distance: 0 meters";
 
-			// Area Label
-			const areaLabel = L.DomUtil.create("div", "area-label", container);
-			areaLabel.id = "area";
-			areaLabel.innerHTML = "Area: 0 square meters";
 			L.DomEvent.on(container, "click", L.DomEvent.stopPropagation);
 			return container;
 		},
@@ -57,6 +53,17 @@
 				return `${(value * 0.000621371).toFixed(2)} miles`;
 			default:
 				return `${value.toFixed(2)} meters`;
+		}
+	}
+
+	function formatArea(value) {
+		switch (areaUnit) {
+			case "squareKilometers":
+				return `${(value / 1e6).toFixed(2)} square kilometers`;
+			case "acres":
+				return `${(value * 0.000247105).toFixed(2)} acres`;
+			default:
+				return `${value.toFixed(2)} square meters`;
 		}
 	}
 
@@ -79,17 +86,15 @@
 				const lineString = turf.lineString(coordinates);
 
 				// Calculate the length of the line string
-				const distance = turf.length(lineString, { units: 'meters' });
+				const distance = turf.length(lineString, { units: "meters" });
 
 				document.getElementById(
-					"distance"
+					"output"
 				).innerText = `Distance: ${formatDistance(distance)}`;
 				polyline
-				.bindTooltip(`Distance: ${formatDistance(distance)}`)
-				.openTooltip();
+					.bindTooltip(`Distance: ${formatDistance(distance)}`)
+					.openTooltip();
 			}
-				
-
 		} else {
 			polygon.setLatLngs(latlngs);
 			if (polygon.getLatLngs()[0].length > 2) {
@@ -99,30 +104,11 @@
 				coordinates.push(coordinates[0]); // Close the polygon
 				const turfPolygon = turf.polygon([coordinates]);
 				const area = turf.area(turfPolygon);
-				polygon
-					.bindTooltip(`Area: ${formatArea(area)}`)
-					.openTooltip();
+				polygon.bindTooltip(`Area: ${formatArea(area)}`).openTooltip();
 				document.getElementById(
-					"area"
+					"output"
 				).innerText = `Area: ${formatArea(area)}`;
 			}
-		}
-
-
-		if (mode === "distance") {
-			} else {
-				
-			}
-	}
-
-	function formatArea(value) {
-		switch (areaUnit) {
-			case "squareKilometers":
-				return `${(value / 1e6).toFixed(2)} square kilometers`;
-			case "acres":
-				return `${(value * 0.000247105).toFixed(2)} acres`;
-			default:
-				return `${value.toFixed(2)} square meters`;
 		}
 	}
 
@@ -193,11 +179,9 @@
 			if (mode === "distance") {
 				polyline.addTo(map);
 				polyline.addLatLng(e.latlng);
-				
 			} else {
 				polygon.addLatLng(e.latlng);
 				polygon.addTo(map);
-				
 			}
 
 			update();
