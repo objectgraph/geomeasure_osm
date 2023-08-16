@@ -23,13 +23,22 @@
 			// Toggle Button
 			const toggleButton = L.DomUtil.create(
 				"button",
-				"toggle-button",
+				"mode-button",
 				container
 			);
-			toggleButton.innerHTML = "Toggle Measurement";
+			toggleButton.innerHTML = "Mode";
 			toggleButton.onclick = () => {
 				modeChange();
-				// Additional logic to update UI
+			};
+
+			const clearButton = L.DomUtil.create(
+				"button",
+				"clear-button",
+				container
+			);
+			clearButton.innerHTML = "Clear";
+			clearButton.onclick = () => {
+				clear();
 			};
 
 			// Distance Label

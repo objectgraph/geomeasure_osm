@@ -66,14 +66,11 @@ button:focus {
 	background-color: white;
 	padding: 10px;
 	border: 1px solid #ccc;
+	min-width: 100px;
 }
 
-.toggle-button {
-	display: block;
-	margin-bottom: 5px;
-}
 
-.distance-label,
-.area-label {
+
+.output-label{
 	margin: 5px 0;
 }
