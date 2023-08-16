@@ -153,8 +153,8 @@
 		);
 		let dragging = false;
 
-		// Handle mouseup event
-		map.on("mouseup", function () {
+		// Handle mouseup touchend event
+		map.on("mouseup touchend", function () {
 			if (dragging) {
 				dragging = false;
 				justReleased = true; // Set justReleased to true
@@ -184,13 +184,13 @@
 				draggable: true,
 			});
 
-			// Handle mousedown event
-			marker.on("mousedown", function (e) {
+			// Handle mousedown touchstart event
+			marker.on("mousedown touchstart", function (e) {
 				justReleased = false; // Reset justReleased
 				dragging = true;
 				currentMarker = marker;
 				map.dragging.disable();
-				map.on("mousemove", onMouseMove);
+				map.on("mousemove touchmove", onMouseMove);
 			});
 
 			marker.addTo(markers);
