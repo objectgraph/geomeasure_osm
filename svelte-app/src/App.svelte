@@ -9,6 +9,7 @@
 	let distanceUnit = "meters";
 	let areaUnit = "squareMeters";
 	let currentMarker = null;
+	let justReleased = false;
 
 	const measurementControl = L.Control.extend({
 		options: {
@@ -69,9 +70,49 @@
 		// Update the polyline with the new latlngs
 		if (mode == "distance") {
 			polyline.setLatLngs(latlngs);
+			if (polyline.getLatLngs().length > 1) {
+				const coordinates = polyline
+					.getLatLngs()
+					.map((latlng) => [latlng.lng, latlng.lat]);
+
+				// Create a line string from the coordinates
+				const lineString = turf.lineString(coordinates);
+
+				// Calculate the length of the line string
+				const distance = turf.length(lineString, { units: 'meters' });
+
+				document.getElementById(
+					"distance"
+				).innerText = `Distance: ${formatDistance(distance)}`;
+				polyline
+				.bindTooltip(`Distance: ${formatDistance(distance)}`)
+				.openTooltip();
+			}
+				
+
 		} else {
 			polygon.setLatLngs(latlngs);
+			if (polygon.getLatLngs()[0].length > 2) {
+				const coordinates = polygon
+					.getLatLngs()[0]
+					.map((latlng) => [latlng.lng, latlng.lat]);
+				coordinates.push(coordinates[0]); // Close the polygon
+				const turfPolygon = turf.polygon([coordinates]);
+				const area = turf.area(turfPolygon);
+				polygon
+					.bindTooltip(`Area: ${formatArea(area)}`)
+					.openTooltip();
+				document.getElementById(
+					"area"
+				).innerText = `Area: ${formatArea(area)}`;
+			}
 		}
+
+
+		if (mode === "distance") {
+			} else {
+				
+			}
 	}
 
 	function formatArea(value) {
@@ -106,13 +147,13 @@
 		L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(
 			map
 		);
-		let distance = 0;
 		let dragging = false;
 
 		// Handle mouseup event
 		map.on("mouseup", function () {
 			if (dragging) {
 				dragging = false;
+				justReleased = true; // Set justReleased to true
 				map.off("mousemove", onMouseMove);
 				map.dragging.enable(); // Re-enable map dragging
 				update();
@@ -127,6 +168,10 @@
 		}
 
 		map.on("click", (e) => {
+			if (justReleased) {
+				justReleased = false; // Reset justReleased
+				return; // Skip the rest of the logic
+			}
 			const marker = L.circleMarker(e.latlng, {
 				color: "blue",
 				fillColor: "#30f",
@@ -137,6 +182,7 @@
 
 			// Handle mousedown event
 			marker.on("mousedown", function (e) {
+				justReleased = false; // Reset justReleased
 				dragging = true;
 				currentMarker = marker;
 				map.dragging.disable();
@@ -147,35 +193,14 @@
 			if (mode === "distance") {
 				polyline.addTo(map);
 				polyline.addLatLng(e.latlng);
-				if (polyline.getLatLngs().length > 1) {
-					distance += e.latlng.distanceTo(
-						polyline.getLatLngs()[polyline.getLatLngs().length - 2]
-					);
-					document.getElementById(
-						"distance"
-					).innerText = `Distance: ${formatDistance(distance)}`;
-				}
-				polyline
-					.bindTooltip(`Distance: ${formatDistance(distance)}`)
-					.openTooltip();
+				
 			} else {
 				polygon.addLatLng(e.latlng);
 				polygon.addTo(map);
-				if (polygon.getLatLngs()[0].length > 2) {
-					const coordinates = polygon
-						.getLatLngs()[0]
-						.map((latlng) => [latlng.lng, latlng.lat]);
-					coordinates.push(coordinates[0]); // Close the polygon
-					const turfPolygon = turf.polygon([coordinates]);
-					const area = turf.area(turfPolygon);
-					polygon
-						.bindTooltip(`Area: ${formatArea(area)}`)
-						.openTooltip();
-					document.getElementById(
-						"area"
-					).innerText = `Area: ${formatArea(area)}`;
-				}
+				
 			}
+
+			update();
 		});
 	});
 </script>
@@ -194,11 +219,6 @@
 	</select>
 
 	<div id="map" style="height: 500px;" />
-	<div id="distance">Distance: 0 meters</div>
-	<div id="area">Area: 0 square meters</div>
-	<button on:click={modeChange}>
-		Toggle to {mode === "distance" ? "Area" : "Distance"} Measurement
-	</button>
 </main>
 
 <style>
