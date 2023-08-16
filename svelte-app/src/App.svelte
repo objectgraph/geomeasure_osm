@@ -11,6 +11,7 @@
 	let currentMarker = null;
 	let justReleased = false;
 
+
 	const measurementControl = L.Control.extend({
 		options: {
 			position: "topright",
@@ -38,7 +39,7 @@
 				container
 			);
 			outputLabel.id = "output";
-			outputLabel.innerHTML = "Distance: 0 meters";
+			outputLabel.innerHTML = "Distance: 0m";
 
 			L.DomEvent.on(container, "click", L.DomEvent.stopPropagation);
 			return container;
@@ -48,22 +49,22 @@
 	function formatDistance(value) {
 		switch (distanceUnit) {
 			case "kilometers":
-				return `${(value / 1000).toFixed(2)} kilometers`;
+				return `${(value / 1000).toFixed(2)} km`;
 			case "miles":
-				return `${(value * 0.000621371).toFixed(2)} miles`;
+				return `${(value * 0.000621371).toFixed(2)} mi`;
 			default:
-				return `${value.toFixed(2)} meters`;
+				return `${value.toFixed(2)} m`;
 		}
 	}
 
 	function formatArea(value) {
 		switch (areaUnit) {
 			case "squareKilometers":
-				return `${(value / 1e6).toFixed(2)} square kilometers`;
+				return `${(value / 1e6).toFixed(2)} km<sup>2</sup>`;
 			case "acres":
-				return `${(value * 0.000247105).toFixed(2)} acres`;
+				return `${(value * 0.000247105).toFixed(2)} ac`;
 			default:
-				return `${value.toFixed(2)} square meters`;
+				return `${value.toFixed(2)} m<sup>2</sup>`;
 		}
 	}
 
@@ -90,7 +91,7 @@
 
 				document.getElementById(
 					"output"
-				).innerText = `Distance: ${formatDistance(distance)}`;
+				).innerHTML = `Distance: ${formatDistance(distance)}`;
 				polyline
 					.bindTooltip(`Distance: ${formatDistance(distance)}`)
 					.openTooltip();
@@ -107,20 +108,28 @@
 				polygon.bindTooltip(`Area: ${formatArea(area)}`).openTooltip();
 				document.getElementById(
 					"output"
-				).innerText = `Area: ${formatArea(area)}`;
+				).innerHTML = `Area: ${formatArea(area)}`;
 			}
 		}
 	}
 
-	const modeChange = () => {
-		mode = mode === "distance" ? "area" : "distance";
+	function clear(){
 		polygon.remove();
 		polygon = L.polygon([], { color: "red" });
 		polyline.remove();
 		polyline = L.polyline([], { color: "blue" });
 		markers.clearLayers();
-		document.getElementById("distance").innerText = "Distance: 0 meters";
-		document.getElementById("area").innerText = "Area: 0 square meters";
+		if(mode=="distance"){
+			document.getElementById("output").innerHTML = "Distance: 0 m";
+		}else{
+			document.getElementById("output").innerHTML = "Area: 0 m<sup>2</sup>";
+
+		}
+	}
+
+	function modeChange(){
+		mode = mode === "distance" ? "area" : "distance";
+		clear();
 	};
 
 	onMount(() => {
