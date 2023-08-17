@@ -12,6 +12,26 @@
 	let justReleased = false;
 	let distanceUnitDropdown;
 	let areaUnitDropdown;
+	let undoStack = [];
+	let redoStack = [];
+
+	function undo() {
+		if (undoStack.length > 0) {
+			const lastMarker = undoStack.pop();
+			redoStack.push(lastMarker);
+			markers.removeLayer(lastMarker);
+			update();
+		}
+	}
+
+	function redo() {
+		if (redoStack.length > 0) {
+			const lastMarker = redoStack.pop();
+			undoStack.push(lastMarker);
+			markers.addLayer(lastMarker);
+			update();
+		}
+	}
 
 	const measurementControl = L.Control.extend({
 		options: {
@@ -94,6 +114,26 @@
 				clear();
 			};
 
+			const undoButton = L.DomUtil.create(
+				"button",
+				"clear-button",
+				container
+			);
+			undoButton.innerHTML = "Undo";
+			L.DomEvent.on(undoButton, "click", (e) => {
+				undo();
+			});
+
+			const redoButton = L.DomUtil.create(
+				"button",
+				"clear-button",
+				container
+			);
+			redoButton.innerHTML = "Redo";
+			L.DomEvent.on(redoButton, "click", (e) => {
+				redo();
+			});
+
 			// Distance Label
 			const outputLabel = L.DomUtil.create(
 				"div",
@@ -112,6 +152,13 @@
 			searchInput.type = "text";
 			searchInput.placeholder = "Enter an address";
 
+			L.DomEvent.on(searchInput, "keydown", (e) => {
+				if (e.key === "Enter") {
+					e.preventDefault();
+					searchAddress();
+				}
+			});
+
 			// Search Button
 			const searchButton = L.DomUtil.create(
 				"button",
@@ -120,6 +167,10 @@
 			);
 			searchButton.innerHTML = "Search";
 			searchButton.onclick = () => {
+				searchAddress();
+			};
+
+			function searchAddress() {
 				const address = searchInput.value;
 				fetch(
 					`https://nominatim.openstreetmap.org/search?format=json&q=${address}`
@@ -127,15 +178,24 @@
 					.then((response) => response.json())
 					.then((data) => {
 						if (data.length > 0) {
-							const { lat, lon } = data[0];
-							map.setView([lat, lon], 13);
+							const { boundingbox } = data[0];
+							const southWest = L.latLng(
+								boundingbox[0],
+								boundingbox[2]
+							);
+							const northEast = L.latLng(
+								boundingbox[1],
+								boundingbox[3]
+							);
+							const bounds = L.latLngBounds(southWest, northEast);
+							map.fitBounds(bounds);
 						} else {
 							alert("Address not found");
 						}
 					});
-			};
+			}
 
-			L.DomEvent.on(container, "click", L.DomEvent.stopPropagation);
+			L.DomEvent.disableClickPropagation(container);
 			return container;
 		},
 	});
@@ -317,6 +377,9 @@
 			});
 
 			marker.addTo(markers);
+			undoStack.push(marker);
+			redoStack = []; // Clear redo stack when new action is made
+
 			if (mode === "distance") {
 				polyline.addTo(map);
 				polyline.addLatLng(e.latlng);
