@@ -11,7 +11,7 @@
 	let currentMarker = null;
 	let justReleased = false;
 	let distanceUnitDropdown;
-    let areaUnitDropdown;
+	let areaUnitDropdown;
 
 	const measurementControl = L.Control.extend({
 		options: {
