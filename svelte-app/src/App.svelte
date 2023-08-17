@@ -232,6 +232,7 @@
 		// Update the polyline with the new latlngs
 		if (mode == "distance") {
 			polyline.setLatLngs(latlngs);
+			let distance = 0;
 			if (polyline.getLatLngs().length > 1) {
 				const coordinates = polyline
 					.getLatLngs()
@@ -241,29 +242,34 @@
 				const lineString = turf.lineString(coordinates);
 
 				// Calculate the length of the line string
-				const distance = turf.length(lineString, { units: "meters" });
-
-				document.getElementById(
-					"output"
-				).innerHTML = `Distance: ${formatDistance(distance)}`;
-				polyline
-					.bindTooltip(`Distance: ${formatDistance(distance)}`)
-					.openTooltip();
+				distance = turf.length(lineString, { units: "meters" });
+			} else {
+				distance = 0;
 			}
+			document.getElementById(
+				"output"
+			).innerHTML = `Distance: ${formatDistance(distance)}`;
+			polyline
+				.bindTooltip(`Distance: ${formatDistance(distance)}`)
+				.openTooltip();
 		} else {
 			polygon.setLatLngs(latlngs);
+			let area = 0;
 			if (polygon.getLatLngs()[0].length > 2) {
 				const coordinates = polygon
 					.getLatLngs()[0]
 					.map((latlng) => [latlng.lng, latlng.lat]);
 				coordinates.push(coordinates[0]); // Close the polygon
 				const turfPolygon = turf.polygon([coordinates]);
-				const area = turf.area(turfPolygon);
-				polygon.bindTooltip(`Area: ${formatArea(area)}`).openTooltip();
-				document.getElementById(
-					"output"
-				).innerHTML = `Area: ${formatArea(area)}`;
+				area = turf.area(turfPolygon);
+			} else {
+				area = 0;
 			}
+
+			polygon.bindTooltip(`Area: ${formatArea(area)}`).openTooltip();
+			document.getElementById("output").innerHTML = `Area: ${formatArea(
+				area
+			)}`;
 		}
 	}
 
