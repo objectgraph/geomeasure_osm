@@ -10,6 +10,8 @@
 	let areaUnit = "squareMeters";
 	let currentMarker = null;
 	let justReleased = false;
+	let distanceUnitDropdown;
+    let areaUnitDropdown;
 
 	const measurementControl = L.Control.extend({
 		options: {
@@ -19,7 +21,7 @@
 		onAdd: function (map) {
 			const container = L.DomUtil.create("div", "measurement-control");
 			// Distance Unit Dropdown
-			const distanceUnitDropdown = L.DomUtil.create(
+			distanceUnitDropdown = L.DomUtil.create(
 				"select",
 				"distance-unit-dropdown",
 				container
@@ -42,7 +44,7 @@
 			};
 
 			// Area Unit Dropdown
-			const areaUnitDropdown = L.DomUtil.create(
+			areaUnitDropdown = L.DomUtil.create(
 				"select",
 				"area-unit-dropdown",
 				container
@@ -59,6 +61,17 @@
 				areaUnit = e.target.value;
 				update();
 			};
+
+			// Initially hide the dropdowns
+			distanceUnitDropdown.style.display = "none";
+			areaUnitDropdown.style.display = "none";
+
+			// Show the correct dropdown based on the mode
+			if (mode === "distance") {
+				distanceUnitDropdown.style.display = "block";
+			} else {
+				areaUnitDropdown.style.display = "block";
+			}
 
 			// Toggle Button
 			const toggleButton = L.DomUtil.create(
@@ -91,26 +104,36 @@
 			outputLabel.innerHTML = "Distance: 0m";
 
 			// Search Input
-			const searchInput = L.DomUtil.create("input", "search-input", container);
-    searchInput.type = "text";
-    searchInput.placeholder = "Enter an address";
+			const searchInput = L.DomUtil.create(
+				"input",
+				"search-input",
+				container
+			);
+			searchInput.type = "text";
+			searchInput.placeholder = "Enter an address";
 
-    // Search Button
-    const searchButton = L.DomUtil.create("button", "search-button", container);
-    searchButton.innerHTML = "Search";
-    searchButton.onclick = () => {
-        const address = searchInput.value;
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${address}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.length > 0) {
-                    const { lat, lon } = data[0];
-                    map.setView([lat, lon], 13);
-                } else {
-                    alert('Address not found');
-                }
-            });
-    };
+			// Search Button
+			const searchButton = L.DomUtil.create(
+				"button",
+				"search-button",
+				container
+			);
+			searchButton.innerHTML = "Search";
+			searchButton.onclick = () => {
+				const address = searchInput.value;
+				fetch(
+					`https://nominatim.openstreetmap.org/search?format=json&q=${address}`
+				)
+					.then((response) => response.json())
+					.then((data) => {
+						if (data.length > 0) {
+							const { lat, lon } = data[0];
+							map.setView([lat, lon], 13);
+						} else {
+							alert("Address not found");
+						}
+					});
+			};
 
 			L.DomEvent.on(container, "click", L.DomEvent.stopPropagation);
 			return container;
@@ -201,6 +224,15 @@
 	function modeChange() {
 		mode = mode === "distance" ? "area" : "distance";
 		clear();
+
+		// Hide/show the dropdowns
+		if (mode === "distance") {
+			distanceUnitDropdown.style.display = "block";
+			areaUnitDropdown.style.display = "none";
+		} else {
+			distanceUnitDropdown.style.display = "none";
+			areaUnitDropdown.style.display = "block";
+		}
 	}
 
 	onMount(() => {
