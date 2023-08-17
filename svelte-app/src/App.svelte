@@ -11,7 +11,6 @@
 	let currentMarker = null;
 	let justReleased = false;
 
-
 	const measurementControl = L.Control.extend({
 		options: {
 			position: "topright",
@@ -19,6 +18,47 @@
 
 		onAdd: function (map) {
 			const container = L.DomUtil.create("div", "measurement-control");
+			// Distance Unit Dropdown
+			const distanceUnitDropdown = L.DomUtil.create(
+				"select",
+				"distance-unit-dropdown",
+				container
+			);
+			["meters", "kilometers", "miles"].forEach((unit) => {
+				const option = L.DomUtil.create(
+					"option",
+					"",
+					distanceUnitDropdown
+				);
+				option.value = unit;
+				option.text = unit.charAt(0).toUpperCase() + unit.slice(1);
+				if (unit === distanceUnit) {
+					option.selected = true;
+				}
+			});
+			distanceUnitDropdown.onchange = (e) => {
+				distanceUnit = e.target.value;
+				update();
+			};
+
+			// Area Unit Dropdown
+			const areaUnitDropdown = L.DomUtil.create(
+				"select",
+				"area-unit-dropdown",
+				container
+			);
+			["squareMeters", "squareKilometers", "acres"].forEach((unit) => {
+				const option = L.DomUtil.create("option", "", areaUnitDropdown);
+				option.value = unit;
+				option.text = unit.charAt(0).toUpperCase() + unit.slice(1);
+				if (unit === areaUnit) {
+					option.selected = true;
+				}
+			});
+			areaUnitDropdown.onchange = (e) => {
+				areaUnit = e.target.value;
+				update();
+			};
 
 			// Toggle Button
 			const toggleButton = L.DomUtil.create(
@@ -122,27 +162,54 @@
 		}
 	}
 
-	function clear(){
+	function clear() {
 		polygon.remove();
 		polygon = L.polygon([], { color: "red" });
 		polyline.remove();
 		polyline = L.polyline([], { color: "blue" });
 		markers.clearLayers();
-		if(mode=="distance"){
+		if (mode == "distance") {
 			document.getElementById("output").innerHTML = "Distance: 0 m";
-		}else{
-			document.getElementById("output").innerHTML = "Area: 0 m<sup>2</sup>";
-
+		} else {
+			document.getElementById("output").innerHTML =
+				"Area: 0 m<sup>2</sup>";
 		}
 	}
 
-	function modeChange(){
+	function modeChange() {
 		mode = mode === "distance" ? "area" : "distance";
 		clear();
-	};
+	}
 
 	onMount(() => {
-		const map = L.map("map").setView([51.505, -0.09], 13);
+		const osmLayer = L.tileLayer(
+			"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+			{
+				maxZoom: 19,
+				attribution:
+					'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+			}
+		);
+
+		const openTopoLayer = L.tileLayer(
+			"https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
+			{
+				maxZoom: 17,
+				attribution:
+					'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, ' +
+					'Tiles courtesy of <a href="https://opentopomap.org/">OpenTopoMap</a>',
+			}
+		);
+
+		const baseLayers = {
+			OSM: osmLayer,
+			OpenTopoMap: openTopoLayer,
+		};
+		const map = L.map("map", {
+			center: [51.505, -0.09],
+			zoom: 13,
+			layers: [osmLayer], // Set the default layer
+		});
 		markers.addTo(map);
 
 		const control = new measurementControl();
@@ -151,6 +218,8 @@
 		L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(
 			map
 		);
+
+		L.control.layers(baseLayers).addTo(map);
 		let dragging = false;
 
 		// Handle mouseup touchend event
@@ -208,27 +277,23 @@
 </script>
 
 <main>
-	<select bind:value={distanceUnit}>
-		<option value="meters">Meters</option>
-		<option value="kilometers">Kilometers</option>
-		<option value="miles">Miles</option>
-	</select>
-
-	<select bind:value={areaUnit}>
-		<option value="squareMeters">Square Meters</option>
-		<option value="squareKilometers">Square Kilometers</option>
-		<option value="acres">Acres</option>
-	</select>
-
-	<div id="map" style="height: 500px;" />
+	<div id="map" />
 </main>
 
 <style>
 	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		padding: 0;
+		margin: 0;
+	}
+
+	#map {
+		width: 100%;
+		height: 100%;
 	}
 	@media (min-width: 640px) {
 		main {
