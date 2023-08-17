@@ -90,6 +90,28 @@
 			outputLabel.id = "output";
 			outputLabel.innerHTML = "Distance: 0m";
 
+			// Search Input
+			const searchInput = L.DomUtil.create("input", "search-input", container);
+    searchInput.type = "text";
+    searchInput.placeholder = "Enter an address";
+
+    // Search Button
+    const searchButton = L.DomUtil.create("button", "search-button", container);
+    searchButton.innerHTML = "Search";
+    searchButton.onclick = () => {
+        const address = searchInput.value;
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${address}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length > 0) {
+                    const { lat, lon } = data[0];
+                    map.setView([lat, lon], 13);
+                } else {
+                    alert('Address not found');
+                }
+            });
+    };
+
 			L.DomEvent.on(container, "click", L.DomEvent.stopPropagation);
 			return container;
 		},
