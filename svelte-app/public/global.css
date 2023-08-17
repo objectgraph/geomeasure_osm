@@ -65,11 +65,11 @@ button:focus {
 .measurement-control {
 	background-color: white;
 	padding: 10px;
-	border: 1px solid #ccc;
 	min-width: 100px;
+	border: 2px solid rgba(0,0,0,0.2);
+    background-clip: padding-box;
+	border-radius: 4px;
 }
-
-
 
 .output-label{
 	margin: 5px 0;
