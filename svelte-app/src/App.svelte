@@ -40,6 +40,10 @@
 
 		onAdd: function (map) {
 			const container = L.DomUtil.create("div", "measurement-control");
+			// Project Label
+			const projectLabel = L.DomUtil.create("label", "project-label", container);
+			projectLabel.innerHTML = "GeoMeasure";
+
 			// Distance Unit Dropdown
 			distanceUnitDropdown = L.DomUtil.create(
 				"select",
