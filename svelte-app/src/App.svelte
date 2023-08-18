@@ -145,7 +145,7 @@
 				container
 			);
 			outputLabel.id = "output";
-			outputLabel.innerHTML = "Distance: 0m";
+			outputLabel.innerHTML = "Distance: 0 m";
 
 			// Search Input
 			const searchInput = L.DomUtil.create(
