@@ -330,7 +330,7 @@
 			OpenTopoMap: openTopoLayer,
 		};
 		const map = L.map("map", {
-			center: [51.505, -0.09],
+			center: [40.77372936174687, -73.97155651106351],
 			zoom: 13,
 			layers: [osmLayer], // Set the default layer
 		});
