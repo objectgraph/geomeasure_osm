@@ -2,6 +2,7 @@
 	import L from "leaflet";
 	import { onMount } from "svelte";
 	import * as turf from "@turf/turf";
+	let map;
 	let mode = "distance"; // Default mode
 	let polygon = L.polygon([], { color: "red" });
 	let polyline = L.polyline([], { color: "blue" });
@@ -41,7 +42,11 @@
 		onAdd: function (map) {
 			const container = L.DomUtil.create("div", "measurement-control");
 			// Project Label
-			const projectLabel = L.DomUtil.create("label", "project-label", container);
+			const projectLabel = L.DomUtil.create(
+				"label",
+				"project-label",
+				container
+			);
 			projectLabel.innerHTML = "GeoMeasure";
 
 			// Distance Unit Dropdown
@@ -293,7 +298,24 @@
 
 	function modeChange() {
 		mode = mode === "distance" ? "area" : "distance";
-		clear();
+
+		
+
+		if (mode === "distance") {
+			// Convert polygon to polyline
+			const latlngs = polygon.getLatLngs();
+			polyline.setLatLngs(latlngs);
+			polygon.remove();
+			polygon = L.polygon([], { color: "red" });
+			polyline.addTo(map);
+		} else {
+			// Convert polyline to polygon
+			const latlngs = polyline.getLatLngs();
+			polygon.setLatLngs(latlngs);
+			polyline.remove();
+			polyline = L.polyline([], { color: "blue" });
+			polygon.addTo(map);
+		}
 
 		// Hide/show the dropdowns
 		if (mode === "distance") {
@@ -303,6 +325,8 @@
 			distanceUnitDropdown.style.display = "none";
 			areaUnitDropdown.style.display = "block";
 		}
+
+		update();
 	}
 
 	onMount(() => {
@@ -329,7 +353,7 @@
 			OSM: osmLayer,
 			OpenTopoMap: openTopoLayer,
 		};
-		const map = L.map("map", {
+		map = L.map("map", {
 			center: [40.77372936174687, -73.97155651106351],
 			zoom: 13,
 			layers: [osmLayer], // Set the default layer
