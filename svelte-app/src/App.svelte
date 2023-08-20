@@ -16,6 +16,33 @@
 	let undoStack = [];
 	let redoStack = [];
 
+	let commandKeyDown = false;
+	let shiftKeyDown = false;
+
+	window.addEventListener("keydown", function (event) {
+		if (event.key === "Meta") {
+			commandKeyDown = true;
+		} else if (event.key === "Shift") {
+			shiftKeyDown = true;
+		} else if (
+			commandKeyDown &&
+			shiftKeyDown &&
+			event.key.toLowerCase() === "z"
+		) {
+			redo();
+		} else if (commandKeyDown && event.key.toLowerCase() === "z") {
+			undo();
+		}
+	});
+
+	window.addEventListener("keyup", function (event) {
+		if (event.key === "Meta") {
+			commandKeyDown = false;
+		} else if (event.key === "Shift") {
+			shiftKeyDown = false;
+		}
+	});
+
 	function undo() {
 		if (undoStack.length > 0) {
 			const lastMarker = undoStack.pop();
@@ -252,15 +279,15 @@
 
 				// Calculate the length of the line string
 				distance = turf.length(lineString, { units: "meters" });
+				polyline
+					.bindTooltip(`Distance: ${formatDistance(distance)}`)
+					.openTooltip();
 			} else {
 				distance = 0;
 			}
 			document.getElementById(
 				"output"
 			).innerHTML = `Distance: ${formatDistance(distance)}`;
-			polyline
-				.bindTooltip(`Distance: ${formatDistance(distance)}`)
-				.openTooltip();
 		} else {
 			polygon.setLatLngs(latlngs);
 			let area = 0;
@@ -298,8 +325,6 @@
 
 	function modeChange() {
 		mode = mode === "distance" ? "area" : "distance";
-
-		
 
 		if (mode === "distance") {
 			// Convert polygon to polyline
