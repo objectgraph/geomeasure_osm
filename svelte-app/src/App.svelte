@@ -82,7 +82,7 @@
 				"distance-unit-dropdown",
 				container
 			);
-			["meters", "feet", "kilometers", "miles"].forEach((unit) => {
+			["meters", "feet", "kilometers", "miles", "yards", "inches", "nauticalMiles"].forEach((unit) => {
 				const option = L.DomUtil.create(
 					"option",
 					"",
@@ -105,14 +105,20 @@
 				"area-unit-dropdown",
 				container
 			);
-			["squareMeters","squareFeet", "squareKilometers", "acres"].forEach((unit) => {
-				const option = L.DomUtil.create("option", "", areaUnitDropdown);
-				option.value = unit;
-				option.text = unit.charAt(0).toUpperCase() + unit.slice(1);
-				if (unit === areaUnit) {
-					option.selected = true;
+			["squareMeters", "squareFeet", "squareKilometers", "acres", "squareYards", "squareMiles", "tsubo"].forEach(
+				(unit) => {
+					const option = L.DomUtil.create(
+						"option",
+						"",
+						areaUnitDropdown
+					);
+					option.value = unit;
+					option.text = unit.charAt(0).toUpperCase() + unit.slice(1);
+					if (unit === areaUnit) {
+						option.selected = true;
+					}
 				}
-			});
+			);
 			areaUnitDropdown.onchange = (e) => {
 				areaUnit = e.target.value;
 				update();
@@ -236,7 +242,7 @@
 		},
 	});
 
-	function formatDistance(value) {
+	function formatDistance(value, distanceUnit) {
 		switch (distanceUnit) {
 			case "kilometers":
 				return `${(value / 1000).toFixed(2)} km`;
@@ -244,12 +250,16 @@
 				return `${(value * 0.000621371).toFixed(2)} mi`;
 			case "feet":
 				return `${(value * 3.28084).toFixed(2)} ft`;
+			case "yards":
+				return `${(value * 1.09361).toFixed(2)} yd`;
+			case "nauticalMiles":
+				return `${(value * 0.000539957).toFixed(2)} nmi`;
 			default:
 				return `${value.toFixed(2)} m`;
 		}
 	}
 
-	function formatArea(value) {
+	function formatArea(value, areaUnit) {
 		switch (areaUnit) {
 			case "squareKilometers":
 				return `${(value / 1e6).toFixed(2)} km<sup>2</sup>`;
@@ -257,6 +267,12 @@
 				return `${(value * 0.000247105).toFixed(2)} ac`;
 			case "squareFeet":
 				return `${(value * 10.7639).toFixed(2)} ft<sup>2</sup>`;
+			case "squareYards":
+				return `${(value * 1.19599).toFixed(2)} yd<sup>2</sup>`;
+			case "squareMiles":
+				return `${(value * 3.861e-7).toFixed(2)} mi<sup>2</sup>`;
+			case "tsubo":
+				return `${(value * 0.03025).toFixed(2)} tsubo`;
 			default:
 				return `${value.toFixed(2)} m<sup>2</sup>`;
 		}
