@@ -82,7 +82,7 @@
 				"distance-unit-dropdown",
 				container
 			);
-			["meters", "kilometers", "miles"].forEach((unit) => {
+			["meters", "feet", "kilometers", "miles"].forEach((unit) => {
 				const option = L.DomUtil.create(
 					"option",
 					"",
@@ -105,7 +105,7 @@
 				"area-unit-dropdown",
 				container
 			);
-			["squareMeters", "squareKilometers", "acres"].forEach((unit) => {
+			["squareMeters","squareFeet", "squareKilometers", "acres"].forEach((unit) => {
 				const option = L.DomUtil.create("option", "", areaUnitDropdown);
 				option.value = unit;
 				option.text = unit.charAt(0).toUpperCase() + unit.slice(1);
@@ -242,6 +242,8 @@
 				return `${(value / 1000).toFixed(2)} km`;
 			case "miles":
 				return `${(value * 0.000621371).toFixed(2)} mi`;
+			case "feet":
+				return `${(value * 3.28084).toFixed(2)} ft`;
 			default:
 				return `${value.toFixed(2)} m`;
 		}
@@ -253,6 +255,8 @@
 				return `${(value / 1e6).toFixed(2)} km<sup>2</sup>`;
 			case "acres":
 				return `${(value * 0.000247105).toFixed(2)} ac`;
+			case "squareFeet":
+				return `${(value * 10.7639).toFixed(2)} ft<sup>2</sup>`;
 			default:
 				return `${value.toFixed(2)} m<sup>2</sup>`;
 		}
