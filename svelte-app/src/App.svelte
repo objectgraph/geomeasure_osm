@@ -242,7 +242,7 @@
 		},
 	});
 
-	function formatDistance(value, distanceUnit) {
+	function formatDistance(value) {
 		switch (distanceUnit) {
 			case "kilometers":
 				return `${(value / 1000).toFixed(2)} km`;
@@ -259,7 +259,7 @@
 		}
 	}
 
-	function formatArea(value, areaUnit) {
+	function formatArea(value) {
 		switch (areaUnit) {
 			case "squareKilometers":
 				return `${(value / 1e6).toFixed(2)} km<sup>2</sup>`;
